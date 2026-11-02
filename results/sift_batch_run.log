@@ -1,0 +1,15 @@
+[seq ] nprobe=16 7.19 ms/query recall=0.873
+[batch] nprobe=16 b=    1 7.28 ms/query (-1% vs seq) recall=0.873 partition scans/query=16.0
+[batch] nprobe=16 b=    4 6.86 ms/query (+5% vs seq) recall=0.873 partition scans/query=15.3
+[batch] nprobe=16 b=   16 5.91 ms/query (+18% vs seq) recall=0.873 partition scans/query=13.4
+[batch] nprobe=16 b=   64 3.88 ms/query (+46% vs seq) recall=0.873 partition scans/query=8.9
+[batch] nprobe=16 b=  256 1.65 ms/query (+77% vs seq) recall=0.873 partition scans/query=3.6
+[batch] nprobe=16 b= 1024 0.58 ms/query (+92% vs seq) recall=0.873 partition scans/query=1.0
+[seq ] nprobe=32 14.31 ms/query recall=0.953
+[batch] nprobe=32 b=    1 14.41 ms/query (-1% vs seq) recall=0.953 partition scans/query=32.0
+[batch] nprobe=32 b=    4 12.89 ms/query (+10% vs seq) recall=0.953 partition scans/query=29.5
+[batch] nprobe=32 b=   16 10.04 ms/query (+30% vs seq) recall=0.953 partition scans/query=23.1
+[batch] nprobe=32 b=   64 5.21 ms/query (+64% vs seq) recall=0.953 partition scans/query=12.0
+[batch] nprobe=32 b=  256 1.85 ms/query (+87% vs seq) recall=0.953 partition scans/query=3.8
+[batch] nprobe=32 b= 1024 0.73 ms/query (+95% vs seq) recall=0.953 partition scans/query=1.0
+wrote results/batch_sift_1000000.json

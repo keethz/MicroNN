@@ -1,0 +1,17 @@
+[analyze] 1.2s cost model={"point": 0.00013200683987274654, "scan": 9.49901908801695e-06}
+[u < 0.0001                  ] sel=0.00012 est=0.00010 q-err=   1.2 | pre:1.00/0.4ms post:0.04/46.2ms auto:1.00/0.4ms auto_cost_only:1.00/0.4ms | auto chose pre, best=pre
+[u < 0.0003                  ] sel=0.00030 est=0.00030 q-err=   1.0 | pre:1.00/1.0ms post:0.11/30.6ms auto:1.00/1.0ms auto_cost_only:1.00/1.0ms | auto chose pre, best=pre
+[u < 0.001                   ] sel=0.00097 est=0.00100 q-err=   1.0 | pre:1.00/3.9ms post:0.31/30.9ms auto:1.00/3.7ms auto_cost_only:1.00/4.2ms | auto chose pre, best=pre
+[u < 0.003                   ] sel=0.00300 est=0.00299 q-err=   1.0 | pre:1.00/13.0ms post:0.54/31.5ms auto:1.00/13.1ms auto_cost_only:0.54/31.8ms | auto chose pre, best=pre
+[u < 0.01                    ] sel=0.00998 est=0.00998 q-err=   1.0 | pre:1.00/44.6ms post:0.73/40.4ms auto:0.73/32.9ms auto_cost_only:0.73/31.8ms | auto chose post, best=pre
+[u < 0.03                    ] sel=0.03013 est=0.03014 q-err=   1.0 | pre:1.00/128.9ms post:0.83/33.9ms auto:0.83/29.4ms auto_cost_only:0.83/29.0ms | auto chose post, best=pre
+[u < 0.1                     ] sel=0.10002 est=0.10002 q-err=   1.0 | pre:1.00/427.5ms post:0.90/30.8ms auto:0.90/30.7ms auto_cost_only:0.90/30.5ms | auto chose post, best=pre
+[u < 0.3                     ] sel=0.30022 est=0.30022 q-err=   1.0 | pre:1.00/1294.8ms post:0.93/33.2ms auto:0.93/33.1ms auto_cost_only:0.93/33.8ms | auto chose post, best=post
+[u < 1                       ] sel=1.00000 est=1.00000 q-err=   1.0 | pre:1.00/4350.5ms post:0.96/41.4ms auto:0.96/42.2ms auto_cost_only:0.96/41.6ms | auto chose post, best=post
+[cat = common (zipf)         ] sel=0.27746 est=0.27746 q-err=   1.0 | pre:1.00/791.7ms post:0.93/22.7ms auto:0.93/22.9ms auto_cost_only:0.93/22.6ms | auto chose post, best=post
+[cat = rare (zipf)           ] sel=0.00108 est=0.00108 q-err=   1.0 | pre:1.00/4.0ms post:0.32/9.8ms auto:1.00/4.2ms auto_cost_only:1.00/4.2ms | auto chose pre, best=pre
+[u2 = 7 AND cat = common     ] sel=0.00276 est=0.00277 q-err=   1.0 | pre:1.00/22.1ms post:0.53/31.1ms auto:1.00/22.1ms auto_cost_only:0.53/31.0ms | auto chose pre, best=pre
+[a = 7 AND b = 7             ] sel=0.00897 est=0.00010 q-err=  89.9 | pre:1.00/44.9ms post:0.72/31.1ms auto:1.00/44.8ms auto_cost_only:1.00/44.7ms | auto chose pre, best=pre
+[a = 7 AND b = 8             ] sel=0.00001 est=0.00010 q-err=   7.7 | pre:1.00/8.9ms post:0.04/31.1ms auto:1.00/9.0ms auto_cost_only:1.00/8.4ms | auto chose pre, best=pre
+[corr = v (vector-correlated)] sel=0.01010 est=0.01010 q-err=   1.0 | pre:1.00/35.3ms post:0.64/12.2ms auto:0.64/11.8ms auto_cost_only:0.64/12.1ms | auto chose post, best=pre
+wrote results/filter_sift_1000000.json

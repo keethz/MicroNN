@@ -1,0 +1,62 @@
+{
+ "dataset": "synthetic",
+ "n": 100000,
+ "n_query": 256,
+ "rows": [
+  {
+   "nprobe": 16,
+   "batch": 0,
+   "per_query_ms": 3.8945187187500006,
+   "recall": 0.5737109374999999,
+   "scans": 16
+  },
+  {
+   "nprobe": 16,
+   "batch": 1,
+   "per_query_ms": 3.7993640937500004,
+   "recall": 0.5737109374999999,
+   "scans": 16.0,
+   "vs_sequential": 0.024432961264733932
+  },
+  {
+   "nprobe": 16,
+   "batch": 4,
+   "per_query_ms": 3.1482666015625,
+   "recall": 0.5737109374999999,
+   "scans": 13.30078125,
+   "vs_sequential": 0.1916160047182982
+  },
+  {
+   "nprobe": 16,
+   "batch": 16,
+   "per_query_ms": 1.7757584609374988,
+   "recall": 0.5737109374999999,
+   "scans": 7.60546875,
+   "vs_sequential": 0.544036480711164
+  },
+  {
+   "nprobe": 16,
+   "batch": 64,
+   "per_query_ms": 0.6549869804687476,
+   "recall": 0.5737109374999999,
+   "scans": 2.76171875,
+   "vs_sequential": 0.8318182482175938
+  },
+  {
+   "nprobe": 16,
+   "batch": 256,
+   "per_query_ms": 0.27348388671874846,
+   "recall": 0.5737109374999999,
+   "scans": 0.9296875,
+   "vs_sequential": 0.9297772314196177
+  },
+  {
+   "nprobe": 16,
+   "batch": 1024,
+   "per_query_ms": 0.27407812500000045,
+   "recall": 0.5737109374999999,
+   "scans": 0.9296875,
+   "vs_sequential": 0.9296246481804125
+  }
+ ]
+}

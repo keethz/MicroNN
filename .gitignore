@@ -1,0 +1,12 @@
+# Local environment
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+
+# Datasets, cached ground truth and SQLite databases (several GB; rebuilt by the bench scripts)
+data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm

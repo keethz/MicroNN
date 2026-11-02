@@ -1,0 +1,37 @@
+[estimators] build s: {'independence': 1.0, 'column-group': 59.0, 'sample': 1.0, 'stratified': 20.9} memory KiB: {'independence': 27, 'column-group': 6663, 'sample': 4027, 'stratified': 4218}
+[correlated        p5=0 & q5=0               ] sel=0.18363 indep=0.03987 strat=0.18407 | pre  584.0ms post  39.6ms recall 0.93
+[correlated        p5=1 & q5=1               ] sel=0.18379 indep=0.03994 strat=0.18768 | pre  586.1ms post  42.3ms recall 0.92
+[correlated        p5=0 & q5=0 & u<5%        ] sel=0.00924 indep=0.00200 strat=0.00901 | pre  100.9ms post  36.8ms recall 0.73
+[anti-correlated   p5=0 & q5=1               ] sel=0.00412 indep=0.03992 strat=0.00416 | pre   82.7ms post  36.4ms recall 0.64
+[anti-correlated   p5=1 & q5=2 & u<50%       ] sel=0.00205 indep=0.02003 strat=0.00182 | pre   74.4ms post  40.2ms recall 0.50
+[correlated        p10=0 & q10=0             ] sel=0.09120 indep=0.01003 strat=0.09122 | pre  326.4ms post  39.2ms recall 0.90
+[correlated        p10=1 & q10=1             ] sel=0.09062 indep=0.00995 strat=0.08953 | pre  352.5ms post  38.6ms recall 0.89
+[correlated        p10=0 & q10=0 & u<5%      ] sel=0.00462 indep=0.00050 strat=0.00414 | pre   69.1ms post  44.7ms recall 0.66
+[anti-correlated   p10=0 & q10=1             ] sel=0.00098 indep=0.01001 strat=0.00089 | pre   53.6ms post  46.6ms recall 0.34
+[anti-correlated   p10=1 & q10=2 & u<50%     ] sel=0.00049 indep=0.00498 strat=0.00059 | pre   51.7ms post  47.3ms recall 0.19
+[correlated        p20=0 & q20=0             ] sel=0.04506 indep=0.00247 strat=0.04545 | pre  212.7ms post  43.1ms recall 0.87
+[correlated        p20=1 & q20=1             ] sel=0.04524 indep=0.00251 strat=0.04458 | pre  203.3ms post  42.5ms recall 0.88
+[correlated        p20=0 & q20=0 & u<5%      ] sel=0.00222 indep=0.00012 strat=0.00222 | pre   47.9ms post  45.8ms recall 0.51
+[anti-correlated   p20=0 & q20=1             ] sel=0.00025 indep=0.00248 strat=0.00029 | pre   36.2ms post  44.2ms recall 0.11
+[anti-correlated   p20=1 & q20=2 & u<50%     ] sel=0.00013 indep=0.00125 strat=0.00022 | pre   35.3ms post  38.6ms recall 0.05
+[correlated        p50=0 & q50=0             ] sel=0.01798 indep=0.00040 strat=0.01847 | pre   95.2ms post  36.6ms recall 0.81
+[correlated        p50=1 & q50=1             ] sel=0.01799 indep=0.00040 strat=0.01823 | pre   83.7ms post  38.5ms recall 0.81
+[correlated        p50=0 & q50=0 & u<5%      ] sel=0.00089 indep=0.00002 strat=0.00072 | pre   23.5ms post  36.7ms recall 0.33
+[anti-correlated   p50=0 & q50=1             ] sel=0.00003 indep=0.00040 strat=0.00013 | pre   18.4ms post  36.5ms recall 0.03
+[anti-correlated   p50=1 & q50=2 & u<50%     ] sel=0.00002 indep=0.00020 strat=0.00013 | pre   18.7ms post  37.4ms recall 0.05
+[correlated        a=7 & b=7                 ] sel=0.00897 indep=0.00010 strat=0.00936 | pre   51.8ms post  36.0ms recall 0.74
+[anti-correlated   a=7 & b=8                 ] sel=0.00001 indep=0.00010 strat=0.00010 | pre   11.7ms post  35.9ms recall 0.04
+[independent       u<2%                      ] sel=0.02012 indep=0.02012 strat=0.01997 | pre   88.5ms post  36.0ms recall 0.82
+[independent       u<5% & u2<20              ] sel=0.01003 indep=0.01003 strat=0.00905 | pre  285.2ms post  35.9ms recall 0.77
+[independent       u<20% & u2<50             ] sel=0.10029 indep=0.10003 strat=0.10115 | pre 1041.7ms post  37.4ms recall 0.90
+[independent       u2=7 & cat=common         ] sel=0.00276 indep=0.00277 strat=0.00278 | pre   24.3ms post  36.0ms recall 0.55
+[independent       cat=rare & u2<50          ] sel=0.00054 indep=0.00054 strat=0.00077 | pre    3.6ms post  36.4ms recall 0.21
+[independent       cat=common                ] sel=0.27746 indep=0.27746 strat=0.27331 | pre  752.5ms post  23.6ms recall 0.93
+[vector-correlated corr10=0                  ] sel=0.10003 indep=0.10003 strat=0.10175 | pre  238.7ms post  17.3ms recall 0.84
+[vector-correlated corr10=5                  ] sel=0.10016 indep=0.10016 strat=0.10419 | pre  273.5ms post  19.4ms recall 0.85
+[vector-correlated corr10=0 & u<10%          ] sel=0.00995 indep=0.01001 strat=0.01108 | pre   75.1ms post  37.0ms recall 0.51
+[vector-correlated corr=top1                 ] sel=0.01010 indep=0.01010 strat=0.01086 | pre   33.9ms post  12.7ms recall 0.65
+[vector-correlated corr=top2                 ] sel=0.01009 indep=0.01009 strat=0.01012 | pre   34.9ms post  12.8ms recall 0.77
+[vector-correlated corr1000=top1             ] sel=0.00104 indep=0.00104 strat=0.00083 | pre    3.8ms post  10.9ms recall 0.40
+[vector-correlated corr1000=top2             ] sel=0.00104 indep=0.00104 strat=0.00142 | pre    3.7ms post  10.9ms recall 0.41
+wrote results/research_sift_1000000.json
