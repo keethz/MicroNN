@@ -138,7 +138,7 @@ def main(path):
     with open(path) as f:
         res = json.load(f)
     stem = os.path.splitext(path)[0]
-    with open(stem + "_report.md", "w") as f:
+    with open(stem + "_report.md", "w", encoding="utf-8") as f:
         f.write(report(res))
     plot_qerror(res, stem + "_qerror.png")
     plot_tradeoff(res, stem + "_tradeoff.png")

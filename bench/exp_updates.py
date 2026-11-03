@@ -127,7 +127,7 @@ def main():
                 if os.path.exists(path + suffix):
                     os.remove(path + suffix)
     out = os.path.join(RESULTS, f"updates_{args.dataset}_{args.n}.json")
-    with open(out, "w") as f:
+    with open(out, "w", encoding="utf-8") as f:
         json.dump(res, f, indent=1)
     print("wrote", out)
 

@@ -69,7 +69,7 @@ def main():
                   f"recall={rec:.3f} partition scans/query={row['scans']:.1f}", flush=True)
     db.close()
     out = os.path.join(RESULTS, f"batch_{args.dataset}_{args.n}.json")
-    with open(out, "w") as f:
+    with open(out, "w", encoding="utf-8") as f:
         json.dump(res, f, indent=1)
     print("wrote", out)
 
