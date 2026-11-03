@@ -1,16 +1,15 @@
 # MicroNN re-implementation
 
-A scaled-down Python + SQLite re-implementation of *MicroNN: An On-device Disk-resident Updatable Vector
-Database* (Pound et al., SIGMOD-Companion '25), with experiments that test the paper's claims and a research
-extension on selectivity estimation.
+A scaled-down Python + SQLite re-implementation of *MicroNN: An On-device Disk-resident Updatable Vector Database* (Pound et al., SIGMOD-Companion '25), with experiments that test the paper's claims and two research extensions on filtered search: correlation-aware selectivity estimation (A) and adaptive filtered search (B).
 
-- [REPORT.md](REPORT.md) — the write-up (claims, results, verdicts, research extension)
+- [REPORT.md](REPORT.md) — the write-up for the re-implementation and research extension A (claims, results, verdicts)
 - [PLAN.md](PLAN.md) — the original plan and the pass/fail criterion for each claim
 - [results/NOTES.md](results/NOTES.md) — running lab notes, including bugs found along the way
+- [results/adaptive_synthetic-sift_100000_report.md](results/adaptive_synthetic-sift_100000_report.md) — adaptive filtered search results (research extension B)
 
 ## Setup
 
-Requires Python 3.9+ (tested with 3.9.6 on macOS).
+Requires Python 3.9+ (tested with 3.9.6 on macOS and 3.13 on Linux).
 
 ```bash
 python3 -m venv .venv
@@ -23,6 +22,8 @@ python3 -m venv .venv
 ```bash
 .venv/bin/python -m pytest -q
 ```
+
+On Windows, use `.venv\Scripts\python` instead of `.venv/bin/python` (and `.venv\Scripts\pip` for pip).
 
 ### SIFT1M
 
