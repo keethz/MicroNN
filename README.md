@@ -43,6 +43,7 @@ db.build()                            # mini-batch k-means, k = sqrt(N) partitio
 db.analyze()                          # statistics for the filter optimizer
 ids, dists = db.search(q, k=100, nprobe=16)
 ids, dists = db.search(q, k=100, nprobe=16, filter=[eq("city", "Seattle"), lt("year", 2020)])
+ids, dists = db.search(q, k=100, nprobe=16, filter=[eq("city", "Seattle")], plan="adaptive")  # decides during the scan
 db.add(new_vids, new_vectors, new_attrs)   # searchable immediately
 db.maintain(MaintenancePolicy(delta_max=50_000))  # merge / rebuild when needed
 ```
@@ -59,6 +60,7 @@ by earlier ones (under `data/db/`, about 4 GB in total).
 | C7 | `.venv/bin/python -m bench.exp_batch --dataset sift --n 1000000` |
 | C8 | `.venv/bin/python -m bench.exp_updates --dataset sift --n 1000000` |
 | Research | `.venv/bin/python -m bench.exp_research --dataset sift --n 1000000` |
+| Research B (adaptive) | `.venv/bin/python -m bench.exp_adaptive --dataset sift --n 1000000` |
 
 Plots and tables:
 
@@ -78,14 +80,19 @@ Plots and tables:
 .venv/bin/python -m bench.analyze_research results/research_sift_1000000.json
 ```
 
-Every script also accepts `--dataset synthetic --n 100000` for a quick run without downloading SIFT.
+```bash
+.venv/bin/python -m bench.analyze_adaptive results/adaptive_sift_1000000.json
+```
+
+Every script also accepts `--dataset synthetic --n 100000` for a quick run without downloading SIFT, or
+`--dataset synthetic-sift` for synthetic data at SIFT1M's recall/nprobe operating point (use `--nprobe 10`).
 
 ## Layout
 
 ```
 micronn/   storage, clustering, index, filters, optimizer, batch, baselines, estimators
 bench/     datasets + ground truth, experiment scripts, plotting
-tests/     46 unit tests (correctness, filters, estimators, updates, concurrency, crash safety)
+tests/     51 unit tests (correctness, filters, estimators, updates, concurrency, crash safety)
 results/   JSON results, logs, plots, NOTES.md
 data/      SIFT1M, cached ground truth, SQLite databases (not needed to read the report)
 ```

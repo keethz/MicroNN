@@ -1,5 +1,43 @@
 # Results log
 
+## Milestone 6 — research extension B: adaptive filtered search (Aishwarya)
+
+Run (SIFT-like synthetic, since SIFT1M was not available on this machine):
+`python -m bench.exp_adaptive --dataset synthetic-sift --n 100000 --n-query 30 --nprobe 10`, then
+`python -m bench.analyze_adaptive results/adaptive_synthetic-sift_100000.json`
+(tables `adaptive_synthetic-sift_100000_report.md`, plot `adaptive_synthetic-sift_100000_tradeoff.png`).
+`synthetic-sift` = Gaussian mixture with spread 1.2: ~95% unfiltered recall@100 while probing ~3% of
+partitions, the same operating point as SIFT1M at nprobe=32. **To do: rerun on SIFT1M (nprobe=32).**
+
+**Question.** Extension A showed the optimizer's weak link is predicting post-filter recall *before* the
+query runs (even exact selectivity picks the best plan only ~83% of the time). Can the plan be decided
+*during* execution instead?
+
+**Method (`plan="adaptive"` in `micronn/index.py`).** Scan partitions nearest-first with the filter applied.
+Once k matches are found, measure the local selectivity s (matches / rows scanned so far) and continue to
+`expand * nprobe / s` partitions, because the filtered top-k are roughly the top k/s unfiltered neighbours.
+Fall back to the exact pre-filter whenever finishing the scan would cost more than the estimated
+pre-filter cost. No recall-guard parameter to tune.
+
+| strategy (all 35 filters × 30 queries) | mean ms | queries with recall ≥ 0.9 |
+|---|---|---|
+| post | 9.9 | 6% |
+| auto independence g=1 (paper-style default) | 11.1 | 80% |
+| auto independence g=4 | 20.2 | 97% |
+| **adaptive e=1** | **22.4** | **97%** |
+| pre / auto independence g=16 | 22.5 | 100% |
+
+**Findings.**
+1. Adaptive reaches 97% of queries on target with no tuning; the optimizer needs its recall guard tuned
+   (g=1 → 80%, g=4 → 97%) to get there, and the right g is not known in advance.
+2. It does **not** beat a well-tuned optimizer on this data: same quality, ~10% slower than g=4, because
+   the partitions scanned before falling back to pre are wasted work.
+3. Early version bugs found by the experiment (kept for the write-up): stopping as soon as k matches were
+   found gave 0.41–0.49 recall on broad filters (k quick matches are not the k nearest matches);
+   the fix is the k/s scaling above. A cost budget that ignored the remaining scan also over-scanned.
+4. On this synthetic data pre-filter is cheap for almost every filter, so there is little room to win;
+   SIFT1M, where post-filter is competitive up to ~1–10% selectivity, is the real test.
+
 ## Milestone 5 — research extension A: correlation-aware selectivity estimation (SIFT1M)
 
 Run: `.venv/bin/python -m bench.exp_research --dataset sift --n 1000000` then

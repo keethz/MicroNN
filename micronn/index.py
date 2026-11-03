@@ -36,6 +36,7 @@ class SearchStats:
     delta_scanned: int = 0
     seconds: float = 0.0
     plan: Optional[Plan] = None
+    adaptive_fallback: bool = False   # plan="adaptive" gave up on post-filter and ran pre
 
 
 @dataclass
@@ -324,6 +325,8 @@ class MicroNN:
                 res = self._search_pre(q, k, filter, st)
             elif plan == "post":
                 res = self._search_ivf(q, k, nprobe, filter, st)
+            elif plan == "adaptive":
+                res = self._search_adaptive(q, k, nprobe, filter, st)
             else:
                 raise ValueError(plan)
         else:
@@ -356,6 +359,79 @@ class MicroNN:
         best_v, best_d, n = self._merge_rows(q, k, rows, best_v, best_d)
         st.delta_scanned += n
         st.partitions_probed += len(pids)
+        return best_v, best_d
+
+    # ---------- adaptive filtered search (research extension B) ----------
+    # Defaults for plan="adaptive"; change on the instance to experiment.
+    adaptive_expand: float = 1.0     # scan expand * nprobe / (observed local selectivity) partitions
+    adaptive_budget: float = 1.0     # fall back to pre-filter once post would cost budget x pre's cost
+
+    def _search_adaptive(self, q, k, nprobe, f: Filter, st: SearchStats):
+        """Post-filter that decides *during* the scan instead of before it.
+
+        The fixed plans fail in opposite ways: post-filter scans exactly nprobe partitions, so a
+        selective or vector-correlated filter returns too few matches (low recall); pre-filter is
+        exact but slow for broad filters. The optimizer must guess in advance which one wins, and
+        even with exact selectivities that guess is often wrong (results/NOTES.md, milestone 5).
+
+        Here partitions are scanned nearest-first with the filter applied:
+          1. Scan until k matches are found, then measure the *local* selectivity s: the share
+             of rows scanned so far that passed the filter. The filtered top-k are roughly the
+             top k/s unfiltered neighbours, which are spread over about nprobe/s partitions, so
+             the scan continues to expand * nprobe / s partitions. Because s is measured near
+             the query, this also handles filters correlated with vector location, which a
+             global estimate gets wrong.
+          2. Fall back to pre-filter (exact) when post would cost more than budget * the
+             estimated pre-filter cost: either k matches are still missing and the rows read so
+             far already exceed that, or k matches were found but finishing the scan up to the
+             target would exceed it. Without statistics there is no budget.
+        Matches are counted, so no selectivity estimate is needed for the stopping rule; the
+        estimate is only used to size the fallback budget."""
+        where, params = to_sql(f, "a", self.store.attribute_columns())
+        part_sql = ("SELECT v.vid, v.vec FROM vectors v CROSS JOIN attributes a ON a.vid = v.vid "
+                    f"WHERE v.partition_id = ? AND {where}")
+        conn = self.store.conn
+        order = self.probe(q, self.n_partitions)
+
+        budget_rows = math.inf
+        if self.optimizer is not None:
+            est, cost = self.optimizer.est, self.optimizer.cost
+            pre_cost = est.filter_selectivity(f) * est.n_total * cost.point
+            budget_rows = self.adaptive_budget * pre_cost / cost.scan
+
+        sizes = dict(conn.execute("SELECT partition_id, size FROM centroids"))
+        order_sizes = np.array([sizes.get(int(p), 0) for p in order], dtype=np.int64)
+        prefix = np.concatenate([[0], np.cumsum(order_sizes)])   # rows in the first i partitions
+
+        def fallback():
+            st.partitions_probed += n_scanned
+            st.vectors_scanned += rows_read
+            st.adaptive_fallback = True
+            return self._search_pre(q, k, f, st)
+
+        best_v = np.empty(0, dtype=np.int64)
+        best_d = np.empty(0, dtype=DTYPE)
+        rows_read, matches, n_scanned, target = 0, 0, 0, None
+        for i, pid in enumerate(order):
+            if target is not None and n_scanned >= target:
+                break
+            if target is None and rows_read + order_sizes[i] > budget_rows:
+                return fallback()      # still short of k matches and already as costly as pre
+            rows = conn.execute(part_sql, [int(pid), *params]).fetchall()
+            best_v, best_d, n = self._merge_rows(q, k, rows, best_v, best_d)
+            rows_read += int(order_sizes[i])
+            matches += n
+            n_scanned += 1
+            if target is None and matches >= k:
+                local_sel = matches / max(rows_read, 1)   # observed near this query, not estimated
+                target = min(len(order), max(n_scanned, math.ceil(self.adaptive_expand * nprobe / local_sel)))
+                if prefix[target] > budget_rows:
+                    return fallback()  # k found, but finishing the scan would cost more than pre
+        delta_sql = f"SELECT d.vid, d.vec FROM delta d CROSS JOIN attributes a ON a.vid = d.vid WHERE {where}"
+        best_v, best_d, n = self._merge_rows(q, k, conn.execute(delta_sql, params).fetchall(), best_v, best_d)
+        st.delta_scanned += n
+        st.partitions_probed += n_scanned
+        st.vectors_scanned += rows_read
         return best_v, best_d
 
     def _search_pre(self, q, k, f: Filter, st: SearchStats, chunk: int = 4096):
