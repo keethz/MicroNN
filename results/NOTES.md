@@ -1,7 +1,112 @@
 # Results log
 
-## Milestone 6 — research extension B: adaptive filtered search (Aishwarya)
+## Milestone 7 — GloVe-200 (1,183,514 × 200), paper Table 2 dataset.
 
+Data: ANN-Benchmarks `glove-200-angular.hdf5` (the GloVe row of the paper's Table 2: 200 dims, 1.18M vectors,
+10K queries). Vectors are L2-normalised, so L2 ranking = angular ranking. Full base set; 200 queries for search,
+50 for filters, 30 for extensions A/B, 512 for batching. k = √N = 1088 partitions, k=100.
+Machine: Windows laptop (Intel i7-1355U, 16 GB), Python 3.13. **Latencies are not comparable to the SIFT1M
+numbers (different, slower machine); compare trends and ratios, not milliseconds.**
+
+Runs (logs `glove_*_run.log`):
+```
+python -m bench.exp_search   --dataset glove --n 1183514 --n-query 200 --runs 1
+python -m bench.exp_filter   --dataset glove --n 1183514 --n-query 50
+python -m bench.exp_adaptive --dataset glove --n 1183514
+python -m bench.exp_research --dataset glove --n 1183514
+python -m bench.exp_batch    --dataset glove --n 1183514 --n-query 512 --runs 1
+python -m bench.exp_updates  --dataset glove --n 1000000      # 1M so 20K checkpoints line up (see below)
+python -m bench.plot_updates results/batch_glove_1183514.json results/updates_glove_1000000.json
+```
+Plots/tables: `search_glove_1183514_{c1_c3,c2,c4}.png`, `filter_glove_1183514_{c5.png,table.md}`,
+`research_glove_1183514_{report.md,qerror.png,tradeoff.png}`, `adaptive_glove_1183514_{report.md,tradeoff.png}`, `batch_glove_1183514_c7.png`, `updates_glove_1000000_c8.png`.
+
+### Claim summary (GloVe vs SIFT1M)
+
+| Claim | GloVe result | SIFT1M | Verdict on GloVe |
+|---|---|---|---|
+| C1 low latency at 90% recall | Recall 0.67 @ nprobe 16, 0.79 @ 64, **0.92 @ 256** (4.1 s median on this laptop) | 0.89 @ 16, 0.99 @ 64 | **Does not hold**: GloVe needs ~24% of partitions for 90% recall |
+| C2 ~10 MB, ~100x less | MicroNN 8.7 MiB (tracemalloc) / 17.7 MiB RSS vs in-memory 1,575 / 1,597 MiB → **181x / 90x** | ~86x / ~61x | **Holds** (stronger, since vectors are bigger) |
+| C3 disk ≈ in-memory | MicroNN 5–8x slower at equal recall (7.0x at nprobe 32) | ~7.5x | **Does not hold in Python**; same ratio as SIFT → driver overhead, not data |
+| C4 balanced partitions | λ=1: size std 905 → 16, max 4,444 → 1,160. Without penalty **262 of 1,088 partitions hold ≤ 10 vectors**. Penalty lowers recall at fixed nprobe (0.725 → 0.679 @ 32) | std 491 → 101 | Balance **holds**; same recall cost as SIFT |
+| C5 pre exact / post wins when broad | Pre recall 1.00 everywhere. Latency crossover ≈ 0.5% selectivity. Post recall 0.06 @ 0.01%, 0.36 @ 1%, **max 0.71 at 100%** | crossover ≈ 1%, post 0.90 @ 10% | **Holds**, but post is never good enough on GloVe |
+| C6 optimizer picks right plan | Estimates exact on single columns (q-err ≤ 1.2); picks post for every filter ≥ 1% → recall 0.36–0.71 | same pattern, recall 0.73–0.90 | **Holds partially** (latency yes, recall no) — worse than SIFT |
+| C7 batching | −92% per query at batch 1024 (nprobe 16 and 32); 1.5–1.6 partition scans/query | −92% / −95% | **Holds**, same size as SIFT |
+| C8 updates | Never merge: 22 ms → 1,583 ms over +500K; merge: 53–199 ms, recall 0.65–0.69; rebuild raises recall to 0.70–0.73 | linear growth without merge; rebuild lowered recall | **Holds** with regular merges |
+
+### Findings
+1. **GloVe is a much harder dataset for IVF.** Unfiltered recall@100 at nprobe=32 is only 0.73 (SIFT: 0.96).
+   Word vectors are not well clustered: without the balance penalty a quarter of partitions are almost empty
+   (≤ 10 vectors) and the rest absorb the data. This is a property of the data, not of our build — in-memory IVF
+   on the same partitions gets the identical recall.
+2. **Memory claim gets stronger.** 200-dim vectors make the in-memory index ~1 GB (957 MB of vectors), while
+   MicroNN still streams one partition at a time (8.7 MiB). Same mechanism as SIFT, bigger gap.
+3. **Disk/in-memory gap is the same ~7x as on SIFT**, on a different OS and CPU. Supports the milestone-2
+   attribution: the gap is the Python sqlite3 driver, not the dataset.
+4. **Post-filter recall is capped by unfiltered recall.** On GloVe post-filter can never reach 0.9 at nprobe=32
+   (best 0.71 with no filter at all), so pre-filter is the only plan that meets the target for every filter.
+   The optimizer still picks post above ~0.5% selectivity because its recall guard only checks match counts.
+5. **Extension A (estimators) — mostly the same as SIFT, one negative result.** Independence q-error: median 18x /
+   max 91x on correlated pairs, 10x / 15x on anti-correlated (SIFT: 18x / 90x and 10x / 12x). Column-group and
+   samples fix this (≈1.0 median), at 223 s / 6.5 MiB build for column-group. **But better estimates did not
+   improve plan quality on GloVe**: at g=1, independence gets 60% of queries to recall ≥ 0.9 vs 52% for every
+   correction *including the exact oracle*. Independence underestimates correlated filters, which accidentally
+   pushes them to pre-filter (the only plan that works here). Confirms SIFT finding 4: the decision rule, not
+   the estimate, is the weak link — and on hard data it matters even more.
+6. **Extension B (adaptive) — works, smaller win than hoped.**
+
+   | strategy (35 filters × 30 queries, nprobe=32) | mean ms | p95 ms | mean recall | queries ≥ 0.9 |
+   |---|---|---|---|---|
+   | post | 241 | 364 | 0.336 | 7% |
+   | auto independence g=1 | 302 | 1,428 | 0.751 | 60% |
+   | auto independence g=16 | 838 | 5,412 | 0.953 | 91% |
+   | adaptive e=0.5 | 663 | 2,784 | 0.960 | 89% |
+   | **adaptive e=1** | **1,175** | 5,815 | **0.991** | **97%** |
+   | pre | 1,464 | 7,977 | 1.000 | 100% |
+
+   - Adaptive e=1 gets 97% of queries on target, **20% faster than pre**; e=0.5 matches tuned auto (g=16)
+     quality at ~20% lower latency.
+   - Vector-correlated filters (the case auto gets wrong): adaptive recall 0.95–1.00 vs post 0.17–0.57.
+   - But on GloVe adaptive **falls back to pre for almost every filter** (100% fallback on 31 of 35 filters),
+     because the probed partitions rarely hold enough matches. The partitions scanned before falling back are
+     wasted work, so on anti-correlated filters it is ~65% slower than pre (253 vs 153 ms).
+   - One interesting case: `cat = common` (28% selectivity) — adaptive never falls back, 625 ms vs pre 8,280 ms
+     (13x faster), but recall 0.78, below target. Here the problem is again the low unfiltered recall at nprobe=32.
+   - Conclusion: adaptive search removes the need to tune g, but its speed-up depends on how well the data
+     clusters. On SIFT-like data it matches tuned auto; on GloVe it is mostly "pre-filter with a small detour".
+7. **Batching (C7) is dataset-independent**: −92% at batch 1024 on both datasets, because at that batch size each
+   partition is read ~once for the whole batch.
+
+8. **Updates (C8)** — seed 500K, +500K in 20K batches, nprobe=16, 30 queries (`updates_glove_1000000_c8.png`).
+   Before inserts: 22 ms, recall 0.626.
+
+   | policy | latency after +500K (random / skewed) | recall after +500K | inserts/s (random / skewed) |
+   |---|---|---|---|
+   | never merge | 1,583 / 1,396 ms (linear in delta) | 0.839 | 6,131 / 6,254 |
+   | merge | 150 / 124 ms (saw-tooth 53–199 ms) | 0.673 / 0.672 | 3,611 / 4,204 |
+   | merge + rebuild | 136 / 187 ms | 0.703 / 0.706 | 2,390 / 1,769 |
+
+   - Same pattern as SIFT: without merging, the brute-force delta scan dominates; merging keeps latency bounded.
+   - Never-merge recall *rises* (0.63 → 0.84) because a growing share of the data is searched exactly.
+   - **Different from SIFT:** rebuilds (1 random, 2 skewed; k 707 → 894 / 825 → 990) *raise* recall (0.70–0.73 vs
+     0.66–0.69 merge-only), although nprobe stays 16 while k grows. On SIFT rebuild lowered recall. Likely
+     incremental merge degrades GloVe's already weak clustering more and re-clustering repairs it.
+   - Throughput is ~6–10x lower than on SIFT (different machine, 200-dim vectors): compare policies, not datasets.
+   - Merge-policy first row (42.6 ms vs 22 ms for the same untouched index) is timing noise.
+
+### Issues found (for the write-up)
+- **Windows portability (fixed):** `resource` module does not exist on Windows → `peak_rss_bytes()` falls back to
+  psutil peak working set. Report files written with the default cp1252 encoding crashed on "≥" → all
+  `open(..., "w")` now use `encoding="utf-8"`.
+- **exp_updates with N=1,183,514 wrote only the seed line:** checkpoints need `done % 20000 == 0`, but
+  N/2 = 591,757 never lines up. Rerun with `--n 1000000` (same as SIFT). A proper fix is to also checkpoint at the end.
+- **Timing noise:** balanced MicroNN at nprobe=256 (685 ms) came out faster than nprobe=128 (1,457 ms median,
+  4,296 ms mean), and batch b=1 at nprobe=16 was 35% faster than sequential. Single run on a laptop with
+  background load/throttling; treat individual points with care, trends are consistent.
+- C2 plot has a single N (no `--scaling` run on GloVe to save time), so the C2 figure is one point per system.
+
+
+## Milestone 6 — research extension B: adaptive filtered search
 Run (SIFT-like synthetic, since SIFT1M was not available on this machine):
 `python -m bench.exp_adaptive --dataset synthetic-sift --n 100000 --n-query 30 --nprobe 10`, then
 `python -m bench.analyze_adaptive results/adaptive_synthetic-sift_100000.json`
