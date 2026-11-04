@@ -15,7 +15,10 @@ import argparse
 import json
 import multiprocessing as mp
 import os
-import resource
+try:
+    import resource  # Mac/Linux only
+except ImportError:  # Windows
+    resource = None
 import sys
 import time
 import tracemalloc
@@ -35,6 +38,10 @@ NPROBES = [1, 2, 4, 8, 16, 32, 64, 128, 256]
 
 
 def peak_rss_bytes() -> int:
+    if resource is None:  # Windows: psutil reports the peak working set in bytes
+        import psutil
+        mi = psutil.Process().memory_info()
+        return getattr(mi, "peak_wset", mi.rss)
     r = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     return r if sys.platform == "darwin" else r * 1024  # macOS: bytes, Linux: KiB
 
@@ -188,7 +195,7 @@ def main():
                   f"rss_growth={m['rss_growth']/2**20:.1f}MiB", flush=True)
 
     out = os.path.join(RESULTS, f"search_{args.dataset}_{args.n}.json")
-    with open(out, "w") as f:
+    with open(out, "w", encoding="utf-8") as f:
         json.dump(res, f, indent=1)
     print("wrote", out)
 

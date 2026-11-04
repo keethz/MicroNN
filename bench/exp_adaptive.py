@@ -105,7 +105,7 @@ def main():
     res = dict(dataset=args.dataset, n=args.n, nprobe=args.nprobe, k=K, n_query=args.n_query,
                guards=GUARDS, expands=EXPANDS, filters=filters)
     out_path = os.path.join(RESULTS, f"adaptive_{args.dataset}_{args.n}.json")
-    with open(out_path, "w") as fh:
+    with open(out_path, "w", encoding="utf-8") as fh:
         json.dump(res, fh)
     print("wrote", out_path)
 

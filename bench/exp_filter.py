@@ -161,7 +161,7 @@ def main():
         res["filters"].append(evaluate(db, base, queries, f, name, attrs, args.nprobe, cost_only))
     db.close()
     out = os.path.join(RESULTS, f"filter_{args.dataset}_{args.n}.json")
-    with open(out, "w") as fh:
+    with open(out, "w", encoding="utf-8") as fh:
         json.dump(res, fh, indent=1)
     print("wrote", out)
 

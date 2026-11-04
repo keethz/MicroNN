@@ -60,7 +60,7 @@ def main(path):
         res = json.load(f)
     stem = os.path.splitext(path)[0]
     selectivity_sweep(res, stem + "_c5.png")
-    with open(stem + "_table.md", "w") as f:
+    with open(stem + "_table.md", "w", encoding="utf-8") as f:
         f.write(markdown_table(res) + "\n")
     print("wrote", stem + "_c5.png", stem + "_table.md")
 

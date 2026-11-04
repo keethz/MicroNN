@@ -1,0 +1,36 @@
+[correlated        p5=0 & q5=0               ] sel=0.18390 | pre 5909.3ms post 266.6ms r=0.62 | adaptive 5798.2ms r=1.00 parts=1 fallback=100%
+[correlated        p5=1 & q5=1               ] sel=0.18372 | pre 5583.4ms post 266.6ms r=0.62 | adaptive 5837.6ms r=1.00 parts=1 fallback=100%
+[correlated        p5=0 & q5=0 & u<5%        ] sel=0.00923 | pre  496.3ms post 289.7ms r=0.37 | adaptive  568.6ms r=1.00 parts=6 fallback=100%
+[anti-correlated   p5=0 & q5=1               ] sel=0.00399 | pre  322.0ms post 266.3ms r=0.29 | adaptive  447.5ms r=1.00 parts=16 fallback=100%
+[anti-correlated   p5=1 & q5=2 & u<50%       ] sel=0.00204 | pre  265.2ms post 267.6ms r=0.23 | adaptive  580.8ms r=1.00 parts=33 fallback=100%
+[correlated        p10=0 & q10=0             ] sel=0.09117 | pre 2849.1ms post 286.0ms r=0.57 | adaptive 2924.0ms r=1.00 parts=1 fallback=100%
+[correlated        p10=1 & q10=1             ] sel=0.09059 | pre 2854.0ms post 306.5ms r=0.55 | adaptive 2832.4ms r=1.00 parts=1 fallback=100%
+[correlated        p10=0 & q10=0 & u<5%      ] sel=0.00455 | pre  314.6ms post 261.6ms r=0.31 | adaptive  300.3ms r=1.00 parts=1 fallback=100%
+[anti-correlated   p10=0 & q10=1             ] sel=0.00101 | pre  175.3ms post 271.3ms r=0.18 | adaptive  397.8ms r=1.00 parts=31 fallback=100%
+[anti-correlated   p10=1 & q10=2 & u<50%     ] sel=0.00047 | pre  157.2ms post 277.3ms r=0.13 | adaptive  267.2ms r=1.00 parts=14 fallback=100%
+[correlated        p20=0 & q20=0             ] sel=0.04483 | pre 1552.1ms post 281.3ms r=0.51 | adaptive 1472.0ms r=1.00 parts=2 fallback=100%
+[correlated        p20=1 & q20=1             ] sel=0.04514 | pre 1596.3ms post 281.2ms r=0.51 | adaptive 1543.9ms r=1.00 parts=2 fallback=100%
+[correlated        p20=0 & q20=0 & u<5%      ] sel=0.00225 | pre  201.2ms post 284.2ms r=0.25 | adaptive  215.6ms r=1.00 parts=0 fallback=100%
+[anti-correlated   p20=0 & q20=1             ] sel=0.00026 | pre  117.3ms post 272.2ms r=0.09 | adaptive  173.8ms r=1.00 parts=7 fallback=100%
+[anti-correlated   p20=1 & q20=2 & u<50%     ] sel=0.00011 | pre  111.1ms post 272.6ms r=0.06 | adaptive  167.1ms r=1.00 parts=3 fallback=100%
+[correlated        p50=0 & q50=0             ] sel=0.01817 | pre  683.4ms post 254.7ms r=0.43 | adaptive  742.3ms r=1.00 parts=1 fallback=100%
+[correlated        p50=1 & q50=1             ] sel=0.01808 | pre  652.0ms post 280.1ms r=0.42 | adaptive  725.7ms r=1.00 parts=1 fallback=100%
+[correlated        p50=0 & q50=0 & u<5%      ] sel=0.00095 | pre  111.8ms post 266.0ms r=0.16 | adaptive  106.9ms r=1.00 parts=0 fallback=100%
+[anti-correlated   p50=0 & q50=1             ] sel=0.00004 | pre   78.7ms post 236.4ms r=0.05 | adaptive   89.1ms r=1.00 parts=1 fallback=100%
+[anti-correlated   p50=1 & q50=2 & u<50%     ] sel=0.00001 | pre   94.4ms post 241.6ms r=0.04 | adaptive   69.0ms r=1.00 parts=0 fallback=100%
+[correlated        a=7 & b=7                 ] sel=0.00899 | pre  365.5ms post 307.2ms r=0.36 | adaptive  362.3ms r=1.00 parts=0 fallback=100%
+[anti-correlated   a=7 & b=8                 ] sel=0.00001 | pre   57.1ms post 261.1ms r=0.05 | adaptive   60.1ms r=1.00 parts=0 fallback=100%
+[independent       u<2%                      ] sel=0.02001 | pre  821.3ms post 296.7ms r=0.43 | adaptive  895.8ms r=1.00 parts=4 fallback=100%
+[independent       u<5% & u2<20              ] sel=0.01010 | pre 1650.0ms post 265.4ms r=0.39 | adaptive 1789.1ms r=1.00 parts=7 fallback=100%
+[independent       u<20% & u2<50             ] sel=0.10000 | pre 8274.6ms post 333.3ms r=0.58 | adaptive 6892.5ms r=0.97 parts=1 fallback=77%
+[independent       u2=7 & cat=common         ] sel=0.00284 | pre  156.7ms post 254.5ms r=0.26 | adaptive  236.8ms r=1.00 parts=8 fallback=100%
+[independent       cat=rare & u2<50          ] sel=0.00052 | pre   29.6ms post 247.7ms r=0.13 | adaptive   37.9ms r=1.00 parts=1 fallback=100%
+[independent       cat=common                ] sel=0.27733 | pre 8280.2ms post 210.0ms r=0.64 | adaptive  625.2ms r=0.78 parts=116 fallback=0%
+[vector-correlated corr10=0                  ] sel=0.09982 | pre 3015.2ms post 121.5ms r=0.55 | adaptive 2865.2ms r=0.97 parts=2 fallback=80%
+[vector-correlated corr10=5                  ] sel=0.10017 | pre 3024.7ms post 117.7ms r=0.57 | adaptive 2692.4ms r=0.95 parts=2 fallback=53%
+[vector-correlated corr10=0 & u<10%          ] sel=0.00993 | pre  446.3ms post 267.0ms r=0.34 | adaptive  506.1ms r=1.00 parts=8 fallback=100%
+[vector-correlated corr=top1                 ] sel=0.01008 | pre  328.9ms post  63.1ms r=0.37 | adaptive  375.6ms r=1.00 parts=7 fallback=100%
+[vector-correlated corr=top2                 ] sel=0.01007 | pre  340.7ms post  68.0ms r=0.36 | adaptive  340.6ms r=1.00 parts=7 fallback=100%
+[vector-correlated corr1000=top1             ] sel=0.00104 | pre   31.7ms post  60.6ms r=0.17 | adaptive   40.3ms r=1.00 parts=2 fallback=100%
+[vector-correlated corr1000=top2             ] sel=0.00104 | pre   36.9ms post  66.1ms r=0.17 | adaptive   40.9ms r=1.00 parts=2 fallback=100%
+wrote C:\Users\gnpra\OneDrive\Documents\CS257\MicroNN-main\results\adaptive_glove_1183514.json

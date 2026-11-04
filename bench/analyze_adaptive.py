@@ -104,7 +104,7 @@ def main():
     for c in cats:
         parts += ["", table(summarize(filters, {c}), f"{c} filters")]
     report = path.replace(".json", "_report.md")
-    open(report, "w").write("\n".join(parts) + "\n")
+    open(report, "w", encoding="utf-8").write("\n".join(parts) + "\n")
     png = path.replace(".json", "_tradeoff.png")
     plot(all_rows, png, f"Latency vs quality, all filters ({res['dataset']}, N={res['n']:,})")
     print("\n".join(parts))

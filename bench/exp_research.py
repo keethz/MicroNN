@@ -219,7 +219,7 @@ def main():
     res = dict(dataset=args.dataset, n=args.n, nprobe=args.nprobe, k=K, n_query=args.n_query,
                sample=args.sample, guards=GUARDS, memory_bytes=mem, build_s=build_s, filters=filters)
     out = os.path.join(RESULTS, f"research_{args.dataset}_{args.n}.json")
-    with open(out, "w") as fh:
+    with open(out, "w", encoding="utf-8") as fh:
         json.dump(res, fh)
     print("wrote", out)
 
