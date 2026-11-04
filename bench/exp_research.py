@@ -119,21 +119,44 @@ def _key(f):
 
 def prepare(args, base):
     attrs = make_attributes(base)
-    extra = extra_attributes(base)
-    src = db_path(args.dataset, args.n, 0.0).replace("_b0.0.sqlite", "_filtered.sqlite")
-    dst = src.replace("_filtered", "_research")
+    attrs.update(extra_attributes(base))
+
+    src = db_path(args.dataset, args.n, 0.0)
+    dst = src.replace("_b0.0.sqlite", "_research.sqlite")
+
+    if not os.path.isfile(src):
+        raise FileNotFoundError(f"Run the GIST sweep first: {src}")
+
+    # Validate the source before replacing the derived research database.
+    with sqlite3.connect(f"file:{src}?mode=ro", uri=True) as conn:
+        count = conn.execute("SELECT COUNT(*) FROM vid_map").fetchone()[0]
+        if count != len(base):
+            raise ValueError(
+                f"Index contains {count} vectors; expected {len(base)}"
+            )
+
     for suffix in ("", "-wal", "-shm"):
         if os.path.exists(dst + suffix):
             os.remove(dst + suffix)
-    with sqlite3.connect(src) as s, sqlite3.connect(dst) as d:
-        s.backup(d)
+
+    with sqlite3.connect(f"file:{src}?mode=ro", uri=True) as s:
+        with sqlite3.connect(dst) as d:
+            s.backup(d)
+
     db = MicroNN.open(dst)
-    with db.store.transaction() as conn:
-        for c in extra:
-            db.store.add_attribute_column(c, "INTEGER")
-        conn.executemany(f"UPDATE attributes SET {', '.join(f'{c} = ?' for c in extra)} WHERE vid = ?",
-                         ((*(int(extra[c][i]) for c in extra), i) for i in range(len(base))))
-    attrs.update(extra)
+    with db.store.transaction():
+        for col in attrs:
+            db.store.add_attribute_column(col, "INTEGER")
+
+        rows = [
+            tuple(int(attrs[col][i]) for col in attrs)
+            for i in range(len(base))
+        ]
+        db.store.insert_attributes(
+            np.arange(len(base)).tolist(), rows
+        )
+
+    db.analyze()
     return db, attrs
 
 
@@ -219,7 +242,7 @@ def main():
     res = dict(dataset=args.dataset, n=args.n, nprobe=args.nprobe, k=K, n_query=args.n_query,
                sample=args.sample, guards=GUARDS, memory_bytes=mem, build_s=build_s, filters=filters)
     out = os.path.join(RESULTS, f"research_{args.dataset}_{args.n}.json")
-    with open(out, "w", encoding="utf-8") as fh:
+    with open(out, "w") as fh:
         json.dump(res, fh)
     print("wrote", out)
 

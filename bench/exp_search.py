@@ -15,10 +15,7 @@ import argparse
 import json
 import multiprocessing as mp
 import os
-try:
-    import resource  # Mac/Linux only
-except ImportError:  # Windows
-    resource = None
+import resource
 import sys
 import time
 import tracemalloc
@@ -26,7 +23,7 @@ import warnings
 
 import numpy as np
 
-from bench.datasets import DATA_DIR, cached_ground_truth, load_glove, load_sift, recall_at_k, synthetic
+from bench.datasets import DATA_DIR, cached_ground_truth, load_glove, load_gist, load_sift, recall_at_k, synthetic
 from micronn import InMemoryIVF, MicroNN
 
 # NumPy 2.x + macOS Accelerate: spurious FP flags from matmul (results verified in tests).
@@ -38,10 +35,6 @@ NPROBES = [1, 2, 4, 8, 16, 32, 64, 128, 256]
 
 
 def peak_rss_bytes() -> int:
-    if resource is None:  # Windows: psutil reports the peak working set in bytes
-        import psutil
-        mi = psutil.Process().memory_info()
-        return getattr(mi, "peak_wset", mi.rss)
     r = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     return r if sys.platform == "darwin" else r * 1024  # macOS: bytes, Linux: KiB
 
@@ -59,6 +52,8 @@ def load(dataset: str, n: int, n_query: int):
         base, q = load_sift(n, n_query)
     elif dataset == "glove":
         base, q = load_glove(n, n_query)
+    elif dataset == "gist":
+        base, q = load_gist(n, n_query)
     else:
         raise ValueError(dataset)
     return base, q
@@ -138,7 +133,7 @@ def time_queries(index, queries, nprobe, warmup=10):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dataset", default="synthetic", choices=["synthetic", "synthetic-sift", "sift", "glove"])
+    ap.add_argument("--dataset", default="synthetic", choices=["synthetic", "synthetic-sift", "sift", "glove", "gist"])
     ap.add_argument("--n", type=int, default=100_000)
     ap.add_argument("--n-query", type=int, default=200)
     ap.add_argument("--scaling", type=str, default="",
@@ -195,7 +190,7 @@ def main():
                   f"rss_growth={m['rss_growth']/2**20:.1f}MiB", flush=True)
 
     out = os.path.join(RESULTS, f"search_{args.dataset}_{args.n}.json")
-    with open(out, "w", encoding="utf-8") as f:
+    with open(out, "w") as f:
         json.dump(res, f, indent=1)
     print("wrote", out)
 

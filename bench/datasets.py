@@ -1,9 +1,10 @@
 """Dataset loading, synthetic data/attributes, and exact ground truth.
 
-SIFT1M / GloVe are not downloaded automatically. Get them from:
+SIFT1M / GIST1M / GloVe are not downloaded automatically. Get them from:
   SIFT1M: http://corpus-texmex.irisa.fr/  (sift.tar.gz -> sift_base.fvecs, sift_query.fvecs, sift_groundtruth.ivecs)
-  GloVe:  http://ann-benchmarks.com/glove-200-angular.hdf5  (matches the paper: 200-d, 1.18M base, 10k queries)
-          or https://nlp.stanford.edu/projects/glove/  (glove.6B.zip -> glove.6B.100d.txt)
+  GIST1M: http://corpus-texmex.irisa.fr/  (gist.tar.gz -> data/gist/gist_base.fvecs, gist_query.fvecs), or the
+          DiskANN-format mirror: python -m bench.download_gist  (writes data/gist/fbin/*.fbin)
+  GloVe:  https://nlp.stanford.edu/projects/glove/  (glove.6B.zip -> glove.6B.100d.txt)
 and put them under data/.
 """
 import hashlib
@@ -51,28 +52,45 @@ def load_sift(n_base: Optional[int] = None, n_query: Optional[int] = None) -> Tu
             read_fvecs(os.path.join(d, "sift_query.fvecs"), n_query))
 
 
-def load_glove(n_base: Optional[int] = None, n_query: int = 1000, seed: int = 0) -> Tuple[np.ndarray, np.ndarray]:
-    """GloVe as in the MicroNN paper (Table 2: 200 dims, 1.18M vectors, 10k queries, L2).
+def read_fbin(path: str, limit: Optional[int] = None) -> np.ndarray:
+    """DiskANN .fbin: int32 n_points, int32 dim, then n_points*dim float32 (row-major)."""
+    with open(path, "rb") as f:
+        n, dim = (int(x) for x in np.fromfile(f, dtype=np.int32, count=2))
+        n = n if limit is None else min(n, limit)
+        return np.fromfile(f, dtype=np.float32, count=n * dim).reshape(n, dim)
 
-    Preferred: ANN-Benchmarks' glove-200-angular.hdf5 (1,183,514 base vectors and 10,000 query
-    vectors, 200 dims), which matches the paper's sizes exactly. Download it from
-    http://ann-benchmarks.com/glove-200-angular.hdf5 into data/glove/.
-    Fallback: Stanford's glove.6B.100d.txt (no query split: n_query random rows are held out).
-    Vectors are normalized to unit length, so L2 distance ranks neighbours like cosine."""
-    h5 = os.path.join(DATA_DIR, "glove", "glove-200-angular.hdf5")
-    if os.path.exists(h5):
-        import h5py
-        with h5py.File(h5, "r") as f:
-            base = np.asarray(f["train"][:n_base] if n_base else f["train"][:], dtype=np.float32)
-            queries = np.asarray(f["test"][:n_query], dtype=np.float32)
-    else:
-        x = read_glove(os.path.join(DATA_DIR, "glove", "glove.6B.100d.txt"),
-                       None if n_base is None else n_base + n_query)
-        perm = np.random.default_rng(seed).permutation(len(x))
-        base, queries = x[perm[n_query:]], x[perm[:n_query]]
-    for x in (base, queries):
-        x /= np.linalg.norm(x, axis=1, keepdims=True) + 1e-12  # angular -> L2 on unit vectors
-    return base, queries
+
+def _find(d: str, exts: Tuple[str, ...], *keys: str) -> Optional[str]:
+    import glob
+    for k in keys:
+        for ext in exts:
+            hits = sorted(glob.glob(os.path.join(d, "**", f"*{k}*{ext}"), recursive=True))
+            if hits:
+                return hits[0]
+    return None
+
+
+def load_gist(n_base: Optional[int] = None, n_query: Optional[int] = None) -> Tuple[np.ndarray, np.ndarray]:
+    """GIST1M (960-d). Accepts TEXMEX .fvecs or DiskANN .fbin files anywhere under data/gist/."""
+    d = os.path.join(DATA_DIR, "gist")
+    bf, qf = _find(d, (".fvecs", ".fbin"), "base", "learn"), _find(d, (".fvecs", ".fbin"), "query", "queries")
+    if bf is None or qf is None:
+        raise FileNotFoundError(f"GIST1M base/query files not found under {d}. "
+                                f"Run `python -m bench.download_gist` or extract gist.tar.gz there.")
+    rd = lambda path, lim: read_fbin(path, lim) if path.endswith(".fbin") else read_fvecs(path, lim)
+    base, query = rd(bf, n_base), rd(qf, n_query)
+    if base.shape[1] != query.shape[1]:
+        raise ValueError(f"dimension mismatch: base {base.shape}, query {query.shape} ({bf}, {qf})")
+    return base, query
+
+
+def load_glove(n_base: Optional[int] = None, n_query: int = 1000, seed: int = 0) -> Tuple[np.ndarray, np.ndarray]:
+    """GloVe has no query split: hold out n_query random rows as queries."""
+    x = read_glove(os.path.join(DATA_DIR, "glove", "glove.6B.100d.txt"),
+                   None if n_base is None else n_base + n_query)
+    x /= np.linalg.norm(x, axis=1, keepdims=True) + 1e-12  # angular -> L2 on unit vectors
+    perm = np.random.default_rng(seed).permutation(len(x))
+    return x[perm[n_query:]], x[perm[:n_query]]
 
 
 # ---------- synthetic data ----------
