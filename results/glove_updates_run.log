@@ -1,0 +1,32 @@
+[seed] 500000 vectors, k=707, build 67.5s
+[random never        ] + 100000 delta=100000 k= 707 median=  235.4ms recall=0.697 insert=  5.2s maint=  2.1s
+[random never        ] + 200000 delta=200000 k= 707 median=  683.5ms recall=0.746 insert= 19.1s maint=  6.5s
+[random never        ] + 300000 delta=300000 k= 707 median= 1051.3ms recall=0.783 insert= 32.5s maint= 10.8s
+[random never        ] + 400000 delta=400000 k= 707 median= 1319.4ms recall=0.814 insert= 45.7s maint= 15.9s
+[random never        ] + 500000 delta=500000 k= 707 median= 1582.5ms recall=0.839 insert= 60.5s maint= 21.0s
+[random merge        ] + 100000 delta= 40000 k= 707 median=  167.5ms recall=0.664 insert=  7.0s maint= 12.9s
+[random merge        ] + 200000 delta= 20000 k= 707 median=  110.5ms recall=0.656 insert= 13.9s maint= 33.6s
+[random merge        ] + 300000 delta=     0 k= 707 median=   64.1ms recall=0.646 insert= 21.8s maint= 57.8s
+[random merge        ] + 400000 delta= 40000 k= 707 median=  199.0ms recall=0.671 insert= 29.9s maint= 72.6s
+[random merge        ] + 500000 delta= 20000 k= 707 median=  149.5ms recall=0.673 insert= 38.8s maint= 99.6s
+[random merge+rebuild] + 100000 delta= 40000 k= 707 median=  162.9ms recall=0.664 insert=  6.9s maint= 14.3s
+[random merge+rebuild] + 200000 delta= 20000 k= 707 median=  105.6ms recall=0.656 insert= 13.9s maint= 34.1s
+[random merge+rebuild] + 300000 delta=     0 k= 894 median=   79.8ms recall=0.694 insert= 21.5s maint=133.5s
+[random merge+rebuild] + 400000 delta= 40000 k= 894 median=  169.6ms recall=0.711 insert= 30.5s maint=147.3s
+[random merge+rebuild] + 500000 delta= 20000 k= 894 median=  136.3ms recall=0.703 insert= 37.7s maint=171.4s
+[skewed never        ] + 100000 delta=100000 k= 707 median=  287.4ms recall=0.688 insert=  6.8s maint=  2.6s
+[skewed never        ] + 200000 delta=200000 k= 707 median=  571.4ms recall=0.734 insert= 17.9s maint=  6.0s
+[skewed never        ] + 300000 delta=300000 k= 707 median=  843.4ms recall=0.773 insert= 31.1s maint=  9.8s
+[skewed never        ] + 400000 delta=400000 k= 707 median= 1049.2ms recall=0.813 insert= 45.1s maint= 14.7s
+[skewed never        ] + 500000 delta=500000 k= 707 median= 1395.9ms recall=0.839 insert= 60.0s maint= 20.0s
+[skewed merge        ] + 100000 delta= 40000 k= 707 median=  146.8ms recall=0.661 insert=  5.8s maint= 10.3s
+[skewed merge        ] + 200000 delta= 20000 k= 707 median=   86.3ms recall=0.660 insert= 12.1s maint= 28.7s
+[skewed merge        ] + 300000 delta=     0 k= 707 median=   53.3ms recall=0.658 insert= 19.0s maint= 49.5s
+[skewed merge        ] + 400000 delta= 40000 k= 707 median=  163.8ms recall=0.688 insert= 25.9s maint= 62.5s
+[skewed merge        ] + 500000 delta= 20000 k= 707 median=  123.7ms recall=0.672 insert= 33.6s maint= 85.4s
+[skewed merge+rebuild] + 100000 delta= 40000 k= 707 median=  117.8ms recall=0.661 insert=  6.3s maint= 10.4s
+[skewed merge+rebuild] + 200000 delta= 20000 k= 825 median=  118.6ms recall=0.706 insert= 15.1s maint= 93.2s
+[skewed merge+rebuild] + 300000 delta=     0 k= 825 median=   95.8ms recall=0.704 insert= 22.1s maint=112.7s
+[skewed merge+rebuild] + 400000 delta= 40000 k= 825 median=  192.3ms recall=0.732 insert= 28.7s maint=125.3s
+[skewed merge+rebuild] + 500000 delta= 20000 k= 990 median=  186.7ms recall=0.706 insert= 38.9s maint=243.7s
+wrote C:\Users\gnpra\OneDrive\Documents\CS257\MicroNN-main\results\updates_glove_1000000.json

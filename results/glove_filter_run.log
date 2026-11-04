@@ -1,0 +1,17 @@
+[analyze] 1.6s cost model={"point": 3.119823741729457e-05, "scan": 8.118148090645802e-06}
+[u < 0.0001                  ] sel=0.00012 est=0.00010 q-err=   1.2 | pre:1.00/5.8ms post:0.06/243.4ms auto:1.00/4.0ms auto_cost_only:1.00/3.6ms | auto chose pre, best=pre
+[u < 0.0003                  ] sel=0.00032 est=0.00029 q-err=   1.1 | pre:1.00/13.3ms post:0.10/264.6ms auto:1.00/12.7ms auto_cost_only:1.00/17.1ms | auto chose pre, best=pre
+[u < 0.001                   ] sel=0.00100 est=0.00098 q-err=   1.0 | pre:1.00/51.9ms post:0.17/246.4ms auto:1.00/42.7ms auto_cost_only:1.00/36.3ms | auto chose pre, best=pre
+[u < 0.003                   ] sel=0.00298 est=0.00295 q-err=   1.0 | pre:1.00/138.7ms post:0.25/271.3ms auto:1.00/139.0ms auto_cost_only:1.00/150.7ms | auto chose pre, best=pre
+[u < 0.01                    ] sel=0.00993 est=0.00983 q-err=   1.0 | pre:1.00/463.0ms post:0.36/275.7ms auto:0.36/253.5ms auto_cost_only:0.36/266.0ms | auto chose post, best=pre
+[u < 0.03                    ] sel=0.03001 est=0.02972 q-err=   1.0 | pre:1.00/1363.6ms post:0.45/274.5ms auto:0.45/271.1ms auto_cost_only:0.45/271.3ms | auto chose post, best=pre
+[u < 0.1                     ] sel=0.09969 est=0.09872 q-err=   1.0 | pre:1.00/4550.5ms post:0.55/251.9ms auto:0.55/240.4ms auto_cost_only:0.55/240.6ms | auto chose post, best=pre
+[u < 0.3                     ] sel=0.29993 est=0.29696 q-err=   1.0 | pre:1.00/12188.9ms post:0.63/267.9ms auto:0.63/257.4ms auto_cost_only:0.63/259.9ms | auto chose post, best=pre
+[u < 1                       ] sel=1.00000 est=1.00000 q-err=   1.0 | pre:1.00/41892.6ms post:0.71/321.7ms auto:0.71/342.1ms auto_cost_only:0.71/339.6ms | auto chose post, best=pre
+[cat = common (zipf)         ] sel=0.27733 est=0.27733 q-err=   1.0 | pre:1.00/8443.4ms post:0.63/167.6ms auto:0.63/176.6ms auto_cost_only:0.63/166.2ms | auto chose post, best=pre
+[cat = rare (zipf)           ] sel=0.00107 est=0.00107 q-err=   1.0 | pre:1.00/40.8ms post:0.17/64.8ms auto:1.00/42.6ms auto_cost_only:1.00/49.3ms | auto chose pre, best=pre
+[u2 = 7 AND cat = common     ] sel=0.00284 est=0.00279 q-err=   1.0 | pre:1.00/142.7ms post:0.25/246.3ms auto:1.00/150.8ms auto_cost_only:1.00/147.0ms | auto chose pre, best=pre
+[a = 7 AND b = 7             ] sel=0.00899 est=0.00010 q-err=  90.7 | pre:1.00/324.6ms post:0.35/251.0ms auto:1.00/347.5ms auto_cost_only:1.00/338.7ms | auto chose pre, best=pre
+[a = 7 AND b = 8             ] sel=0.00001 est=0.00010 q-err=  15.0 | pre:1.00/40.1ms post:0.04/224.8ms auto:1.00/35.3ms auto_cost_only:1.00/37.5ms | auto chose pre, best=pre
+[corr = v (vector-correlated)] sel=0.01008 est=0.01008 q-err=   1.0 | pre:1.00/338.9ms post:0.35/75.5ms auto:0.35/68.8ms auto_cost_only:0.35/77.1ms | auto chose post, best=pre
+wrote C:\Users\gnpra\OneDrive\Documents\CS257\MicroNN-main\results\filter_glove_1183514.json
