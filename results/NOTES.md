@@ -143,6 +143,46 @@ pre-filter cost. No recall-guard parameter to tune.
 4. On this synthetic data pre-filter is cheap for almost every filter, so there is little room to win;
    SIFT1M, where post-filter is competitive up to ~1–10% selectivity, is the real test.
 
+### SIFT1M rerun (Keerthana)
+
+Run: `.venv/bin/python -m bench.exp_adaptive --dataset sift --n 1000000` (nprobe=32, 30 queries × 35 filters), twice:
+with the cost model stored in the SIFT database (calibrated on a cold cache, point/scan ratio 14, the same one
+extension A used) → `adaptive_sift_1000000*`; and after recalibrating on a warm cache (ratio 7.8) →
+`adaptive_sift_1000000_warmcost*`. Log: `sift_adaptive_run.log`.
+
+Reproducibility check: rerunning the synthetic-sift experiment on this machine gives identical recall for pre,
+post and all six optimizer settings. Adaptive's quality shifts slightly (e=0.5: 95% → 85%, e=1: 97% → 96% of
+queries on target), because its fallback budget uses the machine's own cost model. Latencies are about 2× lower
+on this M5, and adaptive e=1 is slightly *slower* than always-pre here (12.0 vs 11.4 ms).
+
+| strategy (all filters) | cold cost: mean ms | warm cost: mean ms | queries with recall ≥ 0.9 |
+|---|---|---|---|
+| auto stratified g=16 | 56.7 | 54.3 | 91% |
+| auto independence g=4 | 70.8 | 67.5 | 86% |
+| **adaptive e=0.5** | **105.6** | **95.7** | **100%** |
+| auto independence g=16 | 110.3 | 104.6 | 95% |
+| adaptive e=1 | 119.8 | 108.7 | 100% |
+| pre | 174.9 | 168.2 | 100% |
+
+**Findings on SIFT1M.**
+1. *Adaptive is the fastest way to guarantee recall.* Every adaptive setting puts 100% of queries at recall ≥ 0.9.
+   At e=0.5 and e=1 that is 31–43% faster than always-pre (e=2: only 15–17%). At e=0.5 it dominates the paper's optimizer at g=16 (faster and 100% vs 95%).
+   This differs from the synthetic result, where it only tied a tuned optimizer.
+2. *It does not help at lower recall targets.* The stratified optimizer (extension A) reaches 91% at about half
+   the latency (54–57 ms).
+3. *All of the gain comes from broad filters.* Adaptive skips the fallback on 6 of 35 filters (5 with the warm cost
+   model), all matching 10–28% of rows, and is 3–10× faster than pre on 4 of them (e.g., `cat=common` 80 vs 779 ms; `p5=0 & q5=0` 196 vs
+   706 ms). It falls back to pre on 83–85% of queries, and there it pays for the wasted scan: up to 3× slower
+   than pre on selective anti-correlated filters (`p10=0 & q10=1`: 148 vs 51 ms).
+4. *The fallback budget is too generous.* `calibrate()` times one SQL statement per point lookup, but pre-filter
+   fetches rows in one batched join that measures ≈2.5–5 µs/row against ≈1 µs/row for a scan. The calibrated
+   ratio is 7.8 (warm) or 14 (cold), so the budget can exceed the whole index. For `corr10=0`, a 10% filter whose
+   matches sit far from most queries, adaptive scanned 709 of 1000 partitions and was slower than pre (316 vs
+   248 ms). The warm cost model already cut mean partitions scanned from 68 to 44 and mean latency by 9%.
+   Calibrating pre with a real batched pre-filter query should help further.
+5. Caveat: within each filter, pre and post run before adaptive, so adaptive sees a warmer cache. Small gaps
+   (< 10 ms) between adaptive-with-fallback and pre are within that noise.
+
 ## Milestone 5 — research extension A: correlation-aware selectivity estimation (SIFT1M)
 
 Run: `.venv/bin/python -m bench.exp_research --dataset sift --n 1000000` then
